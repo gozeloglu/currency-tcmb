@@ -2,6 +2,7 @@ package currency
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -51,19 +52,33 @@ type currency struct {
 
 const tcmbURL = "https://www.tcmb.gov.tr/kurlar"
 
+var (
+	ErrHTTP      = errors.New("failed to fetch data")
+	ErrReadAll   = errors.New("failed to read all data")
+	ErrUnmarshal = errors.New("failed to unmarshal XML data")
+)
+
 // New creates a currency object with all currencies prices. For now, it fetches
 // today's prices.
-func New() *TCMB {
+func New(opt ...OptionFunc) *TCMB {
 	// TODO Add functionality of fetching past date's prices.
 	t := &TCMB{currency: make(map[Code]*Currency)}
-	today := todayDate()
-	term := termFrom(today)
-	mbXML, err := fetchCurrency(term, today)
+
+	for _, o := range opt {
+		o(t)
+	}
+
+	// If custom date is not passed to parameter, set today's date.
+	if t.date == "" {
+		today := todayDate()
+		t.date = today
+	}
+	term := termFrom(t.date)
+	mbXML, err := fetchCurrency(term, t.date)
 	if err != nil {
 		return t
 	}
 	t.updateCurrencyMap(mbXML)
-	t.date = mbXML.Date
 	return t
 }
 
@@ -104,21 +119,18 @@ func fetchCurrency(term string, date string) (tcmbXML, error) {
 	u := fmt.Sprintf("%s/%s/%s.xml", tcmbURL, term, date)
 	resp, err := http.Get(u)
 	if err != nil {
-		// TODO Custom error can be returned
-		return tcmbXML{}, err
+		return tcmbXML{}, ErrHTTP
 	}
 	defer resp.Body.Close()
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		// TODO Custom error can be returned
-		return tcmbXML{}, err
+		return tcmbXML{}, ErrReadAll
 	}
 	var mbXML tcmbXML
 	err = xml.Unmarshal(b, &mbXML)
 	if err != nil {
-		// TODO Custom error can be returned
-		return tcmbXML{}, err
+		return tcmbXML{}, ErrUnmarshal
 	}
 	return mbXML, nil
 }

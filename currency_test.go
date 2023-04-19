@@ -1,6 +1,8 @@
 package currency
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestTCMB_FromCurrencyCode(t *testing.T) {
 	tcmb := &TCMB{
@@ -78,17 +80,68 @@ func TestTCMB_FromCurrencyCode(t *testing.T) {
 	}
 }
 
-func TestTodayDate(t *testing.T) {
-	// TODO Hardcoded date will be problem.
-	today := "18042023"
-	got := todayDate()
-	if today != got {
-		t.Errorf("expected: %s\ngot: %s", today, got)
+func TestFetchCurrency(t *testing.T) {
+	testCases := []struct {
+		name            string
+		term            string
+		date            string
+		forexBuying     string
+		forexSelling    string
+		banknoteSelling string
+		banknoteBuying  string
+		expErr          bool
+		err             error
+	}{
+		{
+			name:            "Fetch past time currency rate",
+			term:            "202304",
+			date:            "04042023",
+			forexBuying:     "19.2001",
+			forexSelling:    "19.2347",
+			banknoteBuying:  "19.1867",
+			banknoteSelling: "19.2636",
+		},
+		{
+			name:   "Fetch past time currency rate in weekend",
+			term:   "202304",
+			date:   "01042023",
+			expErr: true,
+			err:    ErrUnmarshal,
+		},
+		{
+			name:   "Future time currency rate",
+			term:   "203307",
+			date:   "01072023",
+			expErr: true,
+			err:    ErrUnmarshal,
+		},
 	}
-	t.Logf("got: %s", got)
-}
 
-func TestNew(t *testing.T) {
-	c := New()
-	t.Log(c.date)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			mbXML, err := fetchCurrency(tc.term, tc.date)
+			if tc.expErr && err != tc.err {
+				t.Fatalf("expected error %v\nactual error: %v", tc.err, err)
+			}
+			if err != nil {
+				// if error is returned to avoid fail in following if checks
+				return
+			}
+			if mbXML.CurrencyList[0].CurrencyName != "US DOLLAR" {
+				t.Errorf("expected name: %s\nactual name: %s", "US DOLLAR", mbXML.CurrencyList[0].CurrencyName)
+			}
+			if mbXML.CurrencyList[0].ForexBuying != tc.forexBuying {
+				t.Errorf("expected forex buying: %s\nactual forex buying: %s", tc.forexBuying, mbXML.CurrencyList[0].ForexBuying)
+			}
+			if mbXML.CurrencyList[0].ForexSelling != tc.forexSelling {
+				t.Errorf("expected forex selling: %s\nactual forex selling: %s", tc.forexSelling, mbXML.CurrencyList[0].ForexSelling)
+			}
+			if mbXML.CurrencyList[0].BanknoteBuying != tc.banknoteBuying {
+				t.Errorf("expected banknote buying: %s\nactual banknote buying: %s", tc.banknoteBuying, mbXML.CurrencyList[0].BanknoteBuying)
+			}
+			if mbXML.CurrencyList[0].BanknoteSelling != tc.banknoteSelling {
+				t.Errorf("expected banknote selling: %s\nactual banknote selling: %s", tc.banknoteSelling, mbXML.CurrencyList[0].BanknoteSelling)
+			}
+		})
+	}
 }
