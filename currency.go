@@ -55,7 +55,7 @@ const tcmbURL = "https://www.tcmb.gov.tr/kurlar"
 // today's prices.
 func New(opt ...OptionFunc) *TCMB {
 	// TODO Add functionality of fetching past date's prices.
-	var t *TCMB
+	t := &TCMB{currency: make(map[Code]*Currency)}
 	today := todayDate()
 	term := termFrom(today)
 	mbXML, err := fetchCurrency(term, today)
@@ -68,6 +68,9 @@ func New(opt ...OptionFunc) *TCMB {
 }
 
 func (t *TCMB) FromCurrencyCode(code Code) *Currency {
+	if len(t.currency) == 0 {
+		return &Currency{}
+	}
 	return t.currency[code]
 }
 
