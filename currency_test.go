@@ -14,5 +14,5 @@ func TestTodayDate(t *testing.T) {
 
 func TestNew(t *testing.T) {
 	c := New("USD")
-	t.Log(c.currency)
+	t.Log(c.date)
 }

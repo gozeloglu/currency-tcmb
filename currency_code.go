@@ -23,7 +23,7 @@ const (
 	PKR = Code("PKR")
 	QAR = Code("QAR")
 	KRW = Code("KRW")
-	AZD = Code("AZD")
+	AZN = Code("AZN")
 	AED = Code("AED")
 )
 
