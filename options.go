@@ -7,7 +7,7 @@ import (
 
 type OptionFunc func(t *TCMB)
 
-// WithDate enables to pass custom date for past dates.
+// WithDate enables to pass custom date for historical currency.
 func WithDate(day int, month time.Month, year int) OptionFunc {
 	return func(t *TCMB) {
 		d := fmt.Sprintf("%d", day)
