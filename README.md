@@ -23,7 +23,7 @@ func main() {
 You can retrieve the historical currency by passing `WithDate()` option. 
 
 ```go
-tcmb := currency.New(WithDate(1,time.September, 2021))  // It fetches 01 September 2021 currency data.
+tcmb := currency.New(WithDate(1, time.September, 2021))  // It fetches 01 September 2021 currency data.
 ```
 
 ## LICENSE

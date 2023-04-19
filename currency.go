@@ -61,7 +61,6 @@ var (
 // New creates a currency object with all currencies prices. For now, it fetches
 // today's prices.
 func New(opt ...OptionFunc) *TCMB {
-	// TODO Add functionality of fetching past date's prices.
 	t := &TCMB{currency: make(map[Code]*Currency)}
 
 	for _, o := range opt {
