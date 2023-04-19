@@ -11,6 +11,7 @@ import (
 // Currency stores its code, forex/banknote buying/selling information.
 type Currency struct {
 	code            Code
+	unit            string
 	forexBuying     string
 	forexSelling    string
 	banknoteBuying  string
@@ -19,11 +20,8 @@ type Currency struct {
 
 // TCMB stores the forex/banknote buying/selling and date data for all currency.
 type TCMB struct {
-	forexBuying     map[Code]string
-	forexSelling    map[Code]string
-	banknoteBuying  map[Code]string
-	banknoteSelling map[Code]string
-	date            string
+	currency map[Code]*Currency
+	date     string
 }
 
 type tcmbXML struct {
@@ -64,22 +62,13 @@ func New(opt ...OptionFunc) *TCMB {
 	if err != nil {
 		return t
 	}
-	t.updateForexBuying(mbXML)
-	t.updateForexSelling(mbXML)
-	t.updateBanknoteBuying(mbXML)
-	t.updateBanknoteSelling(mbXML)
+	t.updateCurrencyMap(mbXML)
 	t.date = mbXML.Date
 	return t
 }
 
 func (t *TCMB) FromCurrencyCode(code Code) *Currency {
-	return &Currency{
-		code:            code,
-		forexBuying:     t.forexBuying[code],
-		forexSelling:    t.forexSelling[code],
-		banknoteBuying:  t.banknoteBuying[code],
-		banknoteSelling: t.banknoteSelling[code],
-	}
+	return t.currency[code]
 }
 
 // ForexSelling returns forex selling for the Currency.
@@ -152,30 +141,17 @@ func termFrom(date string) string {
 	return fmt.Sprintf("%s%s", year, month)
 }
 
-// updateForexBuying sets forex buying information to Currency object.
-func (t *TCMB) updateForexBuying(mbXML tcmbXML) {
+// updateCurrencyMap sets Currency object to TCMB.currency map.
+func (t *TCMB) updateCurrencyMap(mbXML tcmbXML) {
 	for _, curr := range mbXML.CurrencyList {
-		t.forexBuying[Code(curr.CurrencyName)] = curr.ForexBuying
-	}
-}
-
-// updateForexSelling sets forex selling information to Currency object.
-func (t *TCMB) updateForexSelling(mbXML tcmbXML) {
-	for _, curr := range mbXML.CurrencyList {
-		t.forexSelling[Code(curr.CurrencyName)] = curr.ForexSelling
-	}
-}
-
-// updateBanknoteBuying sets banknote selling information to Currency object.
-func (t *TCMB) updateBanknoteBuying(mbXML tcmbXML) {
-	for _, curr := range mbXML.CurrencyList {
-		t.banknoteBuying[Code(curr.CurrencyName)] = curr.BanknoteBuying
-	}
-}
-
-// updateBanknoteSelling sets banknote selling information to Currency object.
-func (t *TCMB) updateBanknoteSelling(mbXML tcmbXML) {
-	for _, curr := range mbXML.CurrencyList {
-		t.banknoteSelling[Code(curr.CurrencyName)] = curr.BanknoteSelling
+		c := &Currency{
+			code:            Code(curr.CurrencyCode),
+			unit:            curr.Unit,
+			forexBuying:     curr.ForexBuying,
+			forexSelling:    curr.ForexSelling,
+			banknoteBuying:  curr.BanknoteBuying,
+			banknoteSelling: curr.BanknoteSelling,
+		}
+		t.currency[Code(curr.CurrencyName)] = c
 	}
 }
