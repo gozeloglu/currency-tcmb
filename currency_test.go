@@ -145,3 +145,60 @@ func TestFetchCurrency(t *testing.T) {
 		})
 	}
 }
+
+func TestCurrency_ForexBuying(t *testing.T) {
+	c := &Currency{
+		code:        "EUR",
+		forexBuying: "15.324",
+	}
+
+	fb := c.ForexBuying()
+	if fb != "15.324" {
+		t.Errorf("expected: 15.324\ngot: %s", fb)
+	}
+}
+
+func TestCurrency_ForexSelling(t *testing.T) {
+	c := &Currency{
+		code:         "EUR",
+		forexSelling: "14.987",
+	}
+
+	fs := c.ForexSelling()
+	if fs != "14.987" {
+		t.Errorf("expected: 14.987\ngot: %s", fs)
+	}
+}
+
+func TestCurrency_BanknoteBuying(t *testing.T) {
+	c := &Currency{
+		code:           "EUR",
+		banknoteBuying: "15.487",
+	}
+
+	bb := c.BanknoteBuying()
+	if bb != "15.487" {
+		t.Errorf("expected: 15.487\ngot: %s", bb)
+	}
+}
+
+func TestCurrency_BanknoteSelling(t *testing.T) {
+	c := &Currency{
+		code:            "EUR",
+		banknoteSelling: "15.426",
+	}
+
+	bs := c.BanknoteSelling()
+	if bs != "15.426" {
+		t.Errorf("expected: 15.426\ngot: %s", bs)
+	}
+}
+
+func TestTermFrom(t *testing.T) {
+	date := "04062023"
+	term := termFrom(date)
+
+	if term != "202306" {
+		t.Errorf("expected: 202306\ngot: %s", term)
+	}
+}
