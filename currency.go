@@ -8,7 +8,17 @@ import (
 	"time"
 )
 
+// Currency stores its code, forex/banknote buying/selling information.
 type Currency struct {
+	code            Code
+	forexBuying     string
+	forexSelling    string
+	banknoteBuying  string
+	banknoteSelling string
+}
+
+// TCMB stores the forex/banknote buying/selling and date data for all currency.
+type TCMB struct {
 	forexBuying     map[Code]string
 	forexSelling    map[Code]string
 	banknoteBuying  map[Code]string
@@ -45,21 +55,56 @@ const tcmbURL = "https://www.tcmb.gov.tr/kurlar"
 
 // New creates a currency object with all currencies prices. For now, it fetches
 // today's prices.
-func New(currency string, opt ...OptionFunc) *Currency {
+func New(opt ...OptionFunc) *TCMB {
 	// TODO Add functionality of fetching past date's prices.
-	var c *Currency
+	var t *TCMB
 	today := todayDate()
 	term := termFrom(today)
 	mbXML, err := fetchCurrency(term, today)
 	if err != nil {
-		return c
+		return t
 	}
-	c.updateForexBuying(mbXML)
-	c.updateForexSelling(mbXML)
-	c.updateBanknoteBuying(mbXML)
-	c.updateBanknoteSelling(mbXML)
-	c.date = mbXML.Date
-	return c
+	t.updateForexBuying(mbXML)
+	t.updateForexSelling(mbXML)
+	t.updateBanknoteBuying(mbXML)
+	t.updateBanknoteSelling(mbXML)
+	t.date = mbXML.Date
+	return t
+}
+
+func (t *TCMB) FromCurrencyCode(code Code) *Currency {
+	return &Currency{
+		code:            code,
+		forexBuying:     t.forexBuying[code],
+		forexSelling:    t.forexSelling[code],
+		banknoteBuying:  t.banknoteBuying[code],
+		banknoteSelling: t.banknoteSelling[code],
+	}
+}
+
+// ForexSelling returns forex selling for the Currency.
+func (c *Currency) ForexSelling() string {
+	return c.forexSelling
+}
+
+// ForexBuying returns forex buying for the Currency.
+func (c *Currency) ForexBuying() string {
+	return c.forexBuying
+}
+
+// BanknoteBuying returns banknote buying for the Currency.
+func (c *Currency) BanknoteBuying() string {
+	return c.banknoteBuying
+}
+
+// BanknoteSelling returns banknote selling for the Currency.
+func (c *Currency) BanknoteSelling() string {
+	return c.banknoteSelling
+}
+
+// Code returns Currency code.
+func (c *Currency) Code() Code {
+	return c.code
 }
 
 // fetchCurrency fetches the given term and date information.
@@ -108,29 +153,29 @@ func termFrom(date string) string {
 }
 
 // updateForexBuying sets forex buying information to Currency object.
-func (c *Currency) updateForexBuying(mbXML tcmbXML) {
+func (t *TCMB) updateForexBuying(mbXML tcmbXML) {
 	for _, curr := range mbXML.CurrencyList {
-		c.forexBuying[Code(curr.CurrencyName)] = curr.ForexBuying
+		t.forexBuying[Code(curr.CurrencyName)] = curr.ForexBuying
 	}
 }
 
 // updateForexSelling sets forex selling information to Currency object.
-func (c *Currency) updateForexSelling(mbXML tcmbXML) {
+func (t *TCMB) updateForexSelling(mbXML tcmbXML) {
 	for _, curr := range mbXML.CurrencyList {
-		c.forexSelling[Code(curr.CurrencyName)] = curr.ForexSelling
+		t.forexSelling[Code(curr.CurrencyName)] = curr.ForexSelling
 	}
 }
 
 // updateBanknoteBuying sets banknote selling information to Currency object.
-func (c *Currency) updateBanknoteBuying(mbXML tcmbXML) {
+func (t *TCMB) updateBanknoteBuying(mbXML tcmbXML) {
 	for _, curr := range mbXML.CurrencyList {
-		c.banknoteBuying[Code(curr.CurrencyName)] = curr.BanknoteBuying
+		t.banknoteBuying[Code(curr.CurrencyName)] = curr.BanknoteBuying
 	}
 }
 
 // updateBanknoteSelling sets banknote selling information to Currency object.
-func (c *Currency) updateBanknoteSelling(mbXML tcmbXML) {
+func (t *TCMB) updateBanknoteSelling(mbXML tcmbXML) {
 	for _, curr := range mbXML.CurrencyList {
-		c.banknoteSelling[Code(curr.CurrencyName)] = curr.BanknoteSelling
+		t.banknoteSelling[Code(curr.CurrencyName)] = curr.BanknoteSelling
 	}
 }
