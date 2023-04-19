@@ -53,7 +53,7 @@ const tcmbURL = "https://www.tcmb.gov.tr/kurlar"
 
 // New creates a currency object with all currencies prices. For now, it fetches
 // today's prices.
-func New(opt ...OptionFunc) *TCMB {
+func New() *TCMB {
 	// TODO Add functionality of fetching past date's prices.
 	t := &TCMB{currency: make(map[Code]*Currency)}
 	today := todayDate()
