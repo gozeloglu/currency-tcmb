@@ -4,21 +4,23 @@ import "testing"
 
 func TestTCMB_FromCurrencyCode(t *testing.T) {
 	tcmb := &TCMB{
-		forexBuying: map[Code]string{
-			USD: "10",
-			EUR: "15",
-		},
-		forexSelling: map[Code]string{
-			USD: "11",
-			EUR: "16",
-		},
-		banknoteBuying: map[Code]string{
-			USD: "12",
-			EUR: "17",
-		},
-		banknoteSelling: map[Code]string{
-			USD: "13",
-			EUR: "18",
+		currency: map[Code]*Currency{
+			USD: {
+				code:            "USD",
+				unit:            "1",
+				forexBuying:     "10",
+				forexSelling:    "11",
+				banknoteBuying:  "12",
+				banknoteSelling: "13",
+			},
+			EUR: {
+				code:            "EUR",
+				unit:            "1",
+				forexBuying:     "15",
+				forexSelling:    "16",
+				banknoteBuying:  "17",
+				banknoteSelling: "18",
+			},
 		},
 		date: "20231904",
 	}
