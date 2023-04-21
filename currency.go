@@ -25,6 +25,7 @@ type TCMB struct {
 	date     string
 }
 
+// tcmbXML is a type for parsing XML data.
 type tcmbXML struct {
 	XMLName      xml.Name   `xml:"Tarih_Date"`
 	Text         string     `xml:",chardata"`
@@ -34,6 +35,7 @@ type tcmbXML struct {
 	CurrencyList []currency `xml:"Currency"`
 }
 
+// currency is a type for parsing XML data.
 type currency struct {
 	Text            string `xml:",chardata"`
 	CrossOrder      string `xml:"CrossOrder,attr"`
@@ -75,12 +77,15 @@ func New(opt ...OptionFunc) *TCMB {
 	term := termFrom(t.date)
 	mbXML, err := fetchCurrency(term, t.date)
 	if err != nil {
-		return t
+		return &TCMB{}
 	}
 	t.updateCurrencyMap(mbXML)
 	return t
 }
 
+// FromCurrencyCode returns currency information data of the given currency code.
+// For example, you can retrieve the currency information of the US Dollar with
+// calling FromCurrencyCode(USD).
 func (t *TCMB) FromCurrencyCode(code Code) *Currency {
 	if len(t.currency) == 0 {
 		return &Currency{}

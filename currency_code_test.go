@@ -27,7 +27,7 @@ func TestCode_String(t *testing.T) {
 		"SOUTH KOREAN WON",
 		"AZERBAIJANI NEW MANAT",
 		"UNITED ARAB EMIRATES DIRHAM",
-		"N/A"}
+		"Not exist"}
 
 	for i, c := range codes {
 		codeFull := c.String()

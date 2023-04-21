@@ -75,6 +75,6 @@ func (c Code) String() string {
 	case "AED":
 		return "UNITED ARAB EMIRATES DIRHAM"
 	default:
-		return "N/A"
+		return "Not exist"
 	}
 }

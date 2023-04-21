@@ -5,39 +5,25 @@ import (
 )
 
 func TestTCMB_FromCurrencyCode(t *testing.T) {
-	tcmb := &TCMB{
-		currency: map[Code]*Currency{
-			USD: {
-				code:            "USD",
-				unit:            "1",
-				forexBuying:     "10",
-				forexSelling:    "11",
-				banknoteBuying:  "12",
-				banknoteSelling: "13",
-			},
-			EUR: {
-				code:            "EUR",
-				unit:            "1",
-				forexBuying:     "15",
-				forexSelling:    "16",
-				banknoteBuying:  "17",
-				banknoteSelling: "18",
-			},
-		},
-		date: "20231904",
-	}
-
 	testCases := []struct {
 		name            string
 		code            Code
+		expCode         Code
 		forexBuying     string
 		forexSelling    string
 		banknoteBuying  string
 		banknoteSelling string
+		tcmbIsEmpty     bool
 	}{
+		{
+			name:        "Empty TCMB.currency list",
+			code:        USD,
+			tcmbIsEmpty: true,
+		},
 		{
 			name:            "USD",
 			code:            USD,
+			expCode:         USD,
 			forexBuying:     "10",
 			forexSelling:    "11",
 			banknoteBuying:  "12",
@@ -46,6 +32,7 @@ func TestTCMB_FromCurrencyCode(t *testing.T) {
 		{
 			name:            "EUR",
 			code:            EUR,
+			expCode:         EUR,
 			forexBuying:     "15",
 			forexSelling:    "16",
 			banknoteBuying:  "17",
@@ -54,15 +41,39 @@ func TestTCMB_FromCurrencyCode(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		tcmb := &TCMB{
+			currency: map[Code]*Currency{
+				USD: {
+					code:            "USD",
+					unit:            "1",
+					forexBuying:     "10",
+					forexSelling:    "11",
+					banknoteBuying:  "12",
+					banknoteSelling: "13",
+				},
+				EUR: {
+					code:            "EUR",
+					unit:            "1",
+					forexBuying:     "15",
+					forexSelling:    "16",
+					banknoteBuying:  "17",
+					banknoteSelling: "18",
+				},
+			},
+			date: "20231904",
+		}
 		t.Run(tc.name, func(t *testing.T) {
+			if tc.tcmbIsEmpty {
+				tcmb = &TCMB{currency: nil, date: ""}
+			}
 			curr := tcmb.FromCurrencyCode(tc.code)
 			fs := curr.ForexSelling()
 			fb := curr.ForexBuying()
 			bs := curr.BanknoteSelling()
 			bb := curr.BanknoteBuying()
 
-			if tc.code != curr.Code() {
-				t.Errorf("expected: %s\ngot: %s", tc.code, curr.Code())
+			if tc.expCode != curr.Code() {
+				t.Errorf("expected: %s\ngot: %s", tc.expCode, curr.Code())
 			}
 			if tc.forexSelling != fs {
 				t.Errorf("expected: %s\ngot: %s", tc.forexSelling, fs)
