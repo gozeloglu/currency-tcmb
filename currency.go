@@ -163,14 +163,15 @@ func termFrom(date string) string {
 // updateCurrencyMap sets Currency object to TCMB.currency map.
 func (t *TCMB) updateCurrencyMap(mbXML tcmbXML) {
 	for _, curr := range mbXML.CurrencyList {
+		code := Code(curr.CurrencyCode)
 		c := &Currency{
-			code:            Code(curr.CurrencyCode),
+			code:            code,
 			unit:            curr.Unit,
 			forexBuying:     curr.ForexBuying,
 			forexSelling:    curr.ForexSelling,
 			banknoteBuying:  curr.BanknoteBuying,
 			banknoteSelling: curr.BanknoteSelling,
 		}
-		t.currency[Code(curr.CurrencyName)] = c
+		t.currency[code] = c
 	}
 }
